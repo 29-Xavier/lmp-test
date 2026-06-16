@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16LMPTI 橹穆同担人格测试</title>
+    <style>
+        /* 全局样式 主色调：蓝+粉 温柔少年风 */
+        *{margin:0;padding:0;box-sizing:border-box;font-family:"微软雅黑",sans-serif;}
+        body{
+            background: linear-gradient(120deg, #e0efff, #ffeef8);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container{max-width: 750px;margin: 0 auto;padding: 20px;}
+        .hide{display: none !important;}
+
+        /* 首页样式 */
+        .home{text-align: center;padding: 40px 20px;}
+        .home .cover{
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(180,150,220,0.3);
+            margin: 0 auto 30px;
+        }
+        .home h1{
+            font-size: 2.2rem;
+            color: #7a67ee;
+            margin-bottom: 15px;
+        }
+        .home .desc{
+            line-height: 1.8;
+            color: #555;
+            margin: 20px auto;
+            font-size: 1rem;
+        }
+        .btn{
+            min-width: 140px;
+            display: inline-block;
+            padding: 12px 35px;
+            background: linear-gradient(90deg, #84a9ff, #ffb3d9);
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin: 10px;
+            transition: 0.3s;
+        }
+        .btn:hover{transform: translateY(-2px);box-shadow: 0 3px 10px rgba(150,120,200,0.4);}
+        .btn:active{transform: translateY(0);}
+
+        /* 答题页样式 */
+        .quiz{padding: 20px;}
+        .progress-box{
+            width: 100%;
+            height: 10px;
+            background: #ddd;
+            border-radius: 5px;
+            margin-bottom: 25px;
+        }
+        .progress-bar{
+            height: 100%;
+            background: linear-gradient(90deg, #84a9ff, #ffb3d9);
+            border-radius: 5px;
+            width: 0%;
+            transition: 0.4s;
+        }
+        .q-num{font-size: 0.9rem;color: #888;margin-bottom: 10px;}
+        .q-title{font-size: 1.15rem;line-height: 1.7;margin-bottom: 25px;}
+        .option{
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 14px 18px;
+            margin: 10px 0;
+            background: rgba(255,255,255,0.7);
+            border: 1px solid #d8c8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 1rem;
+        }
+        .option:hover{background: #f0e8ff;}
+        .option.active{background: #e8d8ff;border-color: #7a67ee;}
+        .btn-group{margin-top: 30px;text-align: center;}
+
+        /* Loading页 */
+        .loading{
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #7a67ee;
+        }
+        .load-icon{
+            width: 80px;
+            height: 80px;
+            border: 5px solid #e0efff;
+            border-top: 5px solid #ffb3d9;
+            border-radius: 50%;
+            animation: rotate 1s linear infinite;
+            margin-bottom: 25px;
+        }
+        @keyframes rotate{100%{transform: rotate(360deg);}}
+
+        /* 结果页 */
+        .result{padding: 20px;text-align: center;}
+        .result-code{
+            font-size: 2rem;
+            color: #7a67ee;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        .result-name{
+            font-size: 1.3rem;
+            color: #ff7aa2;
+            margin-bottom: 20px;
+        }
+        .res-img{
+            width: 220px;
+            height: 220px;
+            border-radius: 12px;
+            margin: 0 auto 25px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+        }
+        .radar-box{
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            margin: 20px auto;
+            background: rgba(255,255,255,0.6);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .res-desc{
+            line-height: 1.9;
+            text-align: left;
+            background: rgba(255,255,255,0.7);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        /* 关于页 */
+        .about{padding: 30px 20px;line-height: 2;background: rgba(255,255,255,0.6);border-radius: 10px;margin: 20px;}
+    </style>
+    <!-- 引入雷达图依赖 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 首页 -->
+        <div class="home" id="homePage">
+            <!-- 替换src为你的首页封面图地址 -->
+            <img class="cover" src="cover.jpg" alt="橹穆氛围感配图">
+            <h1>16LMPTI 橹穆同担人格测试</h1>
+            <div class="desc">
+                LMPTI    橹穆批趣味人格测试<br>
+                四大维度，找到专属你的同担属性^_^<br>
+                
+                 本测试仅供圈内娱乐，无专业心理参考价值
+            </div>
+            <button class="btn" onclick="goQuiz()">开始测试</button>
+            <button class="btn" onclick="goAbout()">关于本测试</button>
+        </div>
+
+        <!-- 答题页 -->
+        <div class="quiz hide" id="quizPage">
+            <div class="progress-box">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="q-num" id="qNum">第 1 题 / 共 39 题</div>
+            <div class="q-title" id="qTitle"></div>
+            <div id="optionsBox"></div>
+            <div class="btn-group">
+                <button class="btn" onclick="prevQ()">上一题</button>
+                <button class="btn" onclick="nextQ()">下一题</button>
+            </div>
+        </div>
+
+        <!-- Loading页 -->
+        <div class="loading hide" id="loadPage">
+            <div class="load-icon"></div>
+            <p>正在调取专属你的嗑糖记忆碎片...</p>
+        </div>
+
+        <!-- 结果页 -->
+        <div class="result hide" id="resPage">
+            <div class="result-code" id="resCode"></div>
+            <div class="result-name" id="resNick"></div>
+            <!-- 替换为对应人格配图 -->
+            <img class="res-img" id="resImg" src="" alt="人格配图">
+            <div class="radar-box">
+                <canvas id="radarChart"></canvas>
+            </div>
+            <div class="res-desc" id="resDesc"></div>
+            <button class="btn" onclick="copyResult()">复制结果文案</button>
+            <button class="btn" onclick="restart()">重新测试</button>
+            <button class="btn" onclick="goHome()">返回首页</button>
+        </div>
+
+        <!-- 关于页 -->
+        <div class="about hide" id="aboutPage">
+            <h3>关于 16LMPTI</h3>
+            <p>本测试为橹穆同担圈内娱乐向趣味测试，模仿16型人格体系制作。</p>
+            <p>四大维度说明：<br>
+            E=追官方 / I=爱脑补<br>
+            O=爱二创 / V=爱吃粮<br>
+            A=下场维权 / L=圈地自萌<br>
+            N=宿命 / D=现实
+            </p>
+            <p>免责声明：所有结果仅作娱乐，请勿过度解读、引战。</p>
+            <p>感谢每一位同担相伴🩵🩷</p>
+            <p>制作：二十一日</p>
+            <button class="btn" onclick="goHome()">返回首页</button>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentQ = 0;
+        let userAnswer = [];
+        // 维度分数 [E,I, O,V, A,L, N,D]
+        let score = [0,0, 0,0, 0,0, 0,0];
+        const totalQ = 39;
+        let radarChartIns = null;
+
+        // 页面切换
+        function hideAll(){
+            document.getElementById('homePage').classList.add('hide');
+            document.getElementById('quizPage').classList.add('hide');
+            document.getElementById('loadPage').classList.add('hide');
+            document.getElementById('resPage').classList.add('hide');
+            document.getElementById('aboutPage').classList.add('hide');
+        }
+        function goHome(){hideAll();document.getElementById('homePage').classList.remove('hide');}
+        function goQuiz(){hideAll();document.getElementById('quizPage').classList.remove('hide');renderQ();}
+        function goAbout(){hideAll();document.getElementById('aboutPage').classList.remove('hide');}
+        function goLoad(){hideAll();document.getElementById('loadPage').classList.remove('hide');}
+        function goRes(){hideAll();document.getElementById('resPage').classList.remove('hide');}
+
+        // 本地缓存 - 保存答题进度
+        function saveCache(){
+            localStorage.setItem('lmptiCache', JSON.stringify({
+                currentQ,
+                userAnswer,
+                score
+            }));
+        }
+
+        // ====================== 题库（完整导入你的题目+计分）======================
+        const questionList = [
+    // 1
+    {
+        title: "1. 长时间没有双人合体新物料更新时，你的第一反应？",
+        dim: "EI",
+        opt: [
+            "A.狂翻官方平台、了解后台路透，蹲后续动态",
+            "B.刷往期公开舞台合集",
+            "C.随缘等待",
+            "D.翻看古早花絮细节，想象私下日常",
+            "E.依靠自己脑补长篇剧情，自己给自己造糖"
+        ]
+    },
+    // 2
+    {
+        title: "2. 看到大佬整理的橹穆时间线长文考据，你？",
+        dim: "EI",
+        opt: [
+            "A.逐字研读，对照原物料核对",
+            "B.完整看完并保存收藏",
+            "C.看一部分感兴趣的段落即可",
+            "D.更喜欢留意文中可以延伸联想的细节",
+            "E.根据关键词脑补出一整套故事"
+        ]
+    },
+    // 3
+    {
+        title: "3. 偶遇别家粉丝或者路人发文拉踩、造谣橹穆CP时，你？",
+        dim: "AL",
+        opt: [
+            "A.有理有据回复，维护CP口碑",
+            "B.在评论区简单解释几句事实依据",
+            "C.划走无视，心里略有不满",
+            "D.拉黑对方，在同担群吐槽",
+            "E.视而不见，不参与外部争论"
+        ]
+    },
+    // 4
+    {
+        title: "4. 青涩的早期和现在的心知肚明，你？",
+        dim: "ND",
+        opt: [
+            "A.更喜欢数年的成长羁绊，爱两人宿命感变化",
+            "B.两种都喜欢，但早期更吸引我",
+            "C.平分秋色",
+            "D.更在意现在相处的各类细节",
+            "E.沉迷当下近距离"
+        ]
+    },
+    // 5
+    {
+        title: "5. 你是否会萌生自己写同人、剪辑视频、制作修图产出的想法？",
+        dim: "OV",
+        opt: [
+            "A.经常有想法，并落地完成过不少作品",
+            "B.偶尔会构思，有空会尝试产出",
+            "C.有一闪而过的念头，从来没有行动",
+            "D.喜欢点赞收藏别人的作品",
+            "E.没有产出想法，安心做纯粹的吃粮人"
+        ]
+    },
+    // 6
+    {
+        title: "6. 浏览二创同人作品(比如捡手机文学)时，你关注？",
+        dim: "ND",
+        opt: [
+            "A.世界观、剧情走向",
+            "B.前后伏笔、有灵性的故事",
+            "C.剧情和小细节我都可以兼顾",
+            "D.容易被片段式的暧昧小动作打动",
+            "E.爱看近距离贴贴、心动的描写"
+        ]
+    },
+    // 7
+    {
+        title: "7. 对于网上流传的各种非官方边角料隐晦糖点，你的态度？",
+        dim: "EI",
+        opt: [
+            "A.只采信有完整官方镜头佐证的内容",
+            "B.可以适度参考，但需要物料作为支撑",
+            "C.半信半疑，随缘看待",
+            "D.愿意深挖边角料背后隐藏的联系",
+            "E.哪怕物料稀少，也能够串联故事"
+        ]
+    },
+    // 8
+    {
+        title: "8. 超话出现需要集体做数据、刷双人热度的号召，你会？",
+        dim: "AL",
+        opt: [
+            "A.积极参与，主动号召身边同担一起行动",
+            "B.力所能及完成基础的数据任务",
+            "C.有空就做，没空直接跳过",
+            "D.默默自己完成",
+            "E.不参与群体性的数据活动"
+        ]
+    },
+    // 9
+    {
+        title: "9. 看到橹穆《天魔》，最先打动你的是？",
+        dim: "ND",
+        opt: [
+            "A.跨代师兄弟难得的同台机会",
+            "B.舞台整体的宿命拉扯氛围感",
+            "C.舞蹈设计和两人舞台表现都很不错",
+            "D.演出过程里无法解释的眼神交汇与动作配合",
+            "E.屈膝对齐身高、剑吻琴弦"
+        ]
+    },
+    // 10
+    {
+        title: "10. 如果发现圈内太太产出的设定和你的想法出入不一致，你会？",
+        dim: "OV",
+        opt: [
+            "A.会动笔写下自己的版本，产出属于自己的二创",
+            "B.会在评论区提出自己的构思，期待太太拓展",
+            "C.礼貌欣赏，保留自己不同的看法",
+            "D.默默划走，继续翻看其他喜欢的作品",
+            "E.无所谓，有粮可以吃就足够"
+        ]
+    },
+    // 11
+    {
+        title: "11. 有唯粉发布偏向拆CP、单人提纯的言论，你？",
+        dim: "AL",
+        opt: [
+            "A.整理客观论据公开反驳，维护CP合理空间",
+            "B.在自己的社交平台发文表明立场",
+            "C.内心反感，但不会公开表态",
+            "D.在私密同担圈子内吐槽",
+            "E.直接拉黑屏蔽，杜绝一切视线交集"
+        ]
+    },
+    // 12
+    {
+        title: "12. 在补过往古早物料时，你习惯的方式？",
+        dim: "EI",
+        opt: [
+            "A.按照官方顺序，完整观看",
+            "B.观看整理的高光剪辑",
+            "C.高光和零散片段都会翻看",
+            "D.喜欢看粉丝截取的不起眼的细节慢放",
+            "E.靠着零散碎片，脑补大剧"
+        ]
+    },
+    // 13
+    {
+        title: "13. 对待同人BE、长线意难平，你的接受度？",
+        dim: "ND",
+        opt: [
+            "A.非常热爱，宿命遗憾感是最大嗑点",
+            "B.可以接受适度的BE，很有故事质感",
+            "C.甜虐结合才是最好的状态",
+            "D.偏爱小虐之后立刻有甜蜜细节弥补",
+            "E.只看甜甜的日常小片段，回避虐向内容"
+        ]
+    },
+    // 14
+    {
+        title: "14. 你是否会主动整理糖点合集、新人入坑科普帖分享出去？",
+        dim: "OV",
+        opt: [
+            "A.经常制作整理，主动发布给圈内新人",
+            "B.偶尔会整理片段内容分享给好友",
+            "C.看到优质合集会转发，自己不制作",
+            "D.只会收藏给自己观看，不对外分享",
+            "E.不会做整理，依赖他人的汇总内容"
+        ]
+    },
+    // 15
+    {
+        title: "15. 当CP短期舆论风向变差时，你的心态？",
+        dim: "AL",
+        opt: [
+            "A.主动参与反黑、澄清，努力扭转口碑",
+            "B.持续关注舆论动态，适时发声",
+            "C.短暂难过，过一段时间自行平复",
+            "D.减少外网浏览，只待在熟悉的同担圈子",
+            "E.隔绝外界舆论，做到眼不见心不烦"
+        ]
+    },
+    // 16
+    {
+        title: "16. 比起已知的公开糖，你对两人未曝光的私下关系好奇心？",
+        dim: "EI",
+        opt: [
+            "A.更相信镜头展现出来的样子，不过度臆测",
+            "B.可以适度想象，但以现实互动为基准",
+            "C.好奇程度一般，都能接受",
+            "D.很愿意根据现有细节推测私下相处模式",
+            "E.热衷于构建完整的私下相处人设与故事"
+        ]
+    },
+    // 17
+    {
+        title: "17. 磕CP过程中，你更容易因为什么产生内耗？",
+        dim: "ND",
+        opt: [
+            "A.担忧两人未来发展走向，害怕长久之后渐行渐远",
+            "B.纠结两人过往经历里留下的遗憾",
+            "C.两种内耗情况都会偶尔出现",
+            "D.在意当下有没有新鲜的近距离互动糖",
+            "E.长时间没有细碎小动作糖点就会感到失落"
+        ]
+    },
+    // 18
+    {
+        title: "18. 如果拥有绘画、剪辑、写作的能力，你会？",
+        dim: "OV",
+        opt: [
+            "A.优先用来持续产出橹穆相关同人作品",
+            "B.会偶尔为自己最喜欢的名场面进行创作",
+            "C.有兴趣但只会当做闲暇偶尔的消遣",
+            "D.更愿意用能力去修缮太太的现有作品",
+            "E.即便拥有能力，也没有产出的欲望"
+        ]
+    },
+    // 19
+    {
+        title: "19. 对于“非双人不约”这条圈内核心规则，你的对外态度？",
+        dim: "AL",
+        opt: [
+            "A.会主动向外科普规则，纠正他人的错误做法",
+            "B.会和熟悉的同担讲明自己的坚持",
+            "C.自己遵守即可，不会刻意教导别人",
+            "D.在自己的小圈子里和同担达成共识",
+            "E.规则只约束自身，不评价其他人的选择"
+        ]
+    },
+
+    // 20
+    {
+        title: "20. 刷短视频推荐时，你主动检索橹穆内容的频率？",
+        dim: "EI",
+        opt: [
+            "A.每天都会主动搜索最新的官方相关物料",
+            "B.隔一段时间就会主动翻看新的剪辑",
+            "C.随缘刷到，搜到就看一看",
+            "D.更愿意翻看陈年旧剪辑、细节解析",
+            "E.会主动搜索同人AU剪辑，不看原版物料"
+        ]
+    },
+    // 21
+    {
+        title: "21. 遇到同担内部出现观点分歧、圈内吵架，你的做法？",
+        dim: "AL",
+        opt: [
+            "A.主动出面调和，理性梳理双方观点",
+            "B.会发表自己中立的看法，引导冷静",
+            "C.选择观望，不参与争论",
+            "D.默默退出讨论，去找关系要好的同担倾诉",
+            "E.避开相关话题，绝不掺和圈内纷争"
+        ]
+    },
+    // 22
+    {
+        title: "22. 回看运动会不心动挑战，你的第一视线落点？",
+        dim: "ND",
+        opt: [
+            "A.两人语言表达",
+            "B.其他师兄弟反应",
+            "C.整体氛围和细微反应",
+            "D.喜欢观察两人对视时的神态变化",
+            "E.十指相扣、眼神回避这类表现"
+        ]
+    },
+    // 23
+    {
+        title: "23. 你对待自己收藏的美图、糖点素材会如何处理？",
+        dim: "OV",
+        opt: [
+            "A.会二次加工，做成海报、语录、剪辑素材向外输出",
+            "B.会简单排版之后分享给自己的同担好友",
+            "C.单纯收藏，偶尔会转发优质内容",
+            "D.作为自己日常嗑糖的私密库存",
+            "E.收藏很少翻看利用"
+        ]
+    },
+    // 24
+    {
+        title: "24. 你认为橹穆最吸引人的核心魅力来源于？",
+        dim: "ND",
+        opt: [
+            "A.跨代相遇、彼此救赎的宿命故事",
+            "B.不同的成长轨迹，不同的性格，却相同的人格底色相遇",
+            "C.宏大故事与日常温柔各占一半",
+            "D.独有的酸涩的暗恋",
+            "E.年上宠 年下肆意"
+        ]
+    },
+    // 25
+    {
+        title: "25. 看到路人创作的脑洞很大的橹穆同人设定，你的看法？",
+        dim: "EI",
+        opt: [
+            "A.如果脱离现实物料太多，会难以认同",
+            "B.可以适度脑洞，基础逻辑需要贴合真人",
+            "C.脑洞大小都可以包容欣赏",
+            "D.很欣赏脱离原版的新颖脑洞设定",
+            "E.越是脱离现实的全新世界观，越能吸引我"
+        ]
+    },
+    // 26
+    {
+        title: "26. 你是否愿意为了双人应援、双人周边主动做宣传扩散？",
+        dim: "AL",
+        opt: [
+            "A.积极宣传，主动安利合适的双人应援企划",
+            "B.会转发官方应援内容给到自己的社交账号",
+            "C.自己参与即可，不刻意宣传",
+            "D.只在私密好友之间分享应援信息",
+            "E.独立参与，拒绝对外宣传造势"
+        ]
+    },
+    // 27
+    {
+        title: "27. 在没有任何新产出的空窗期，你的消遣方式？",
+        dim: "OV",
+        opt: [
+            "A.自主开启新的创作计划，填补空窗期",
+            "B.整理过往旧素材，产出内容",
+            "C.反复翻看过往热门太太的经典作品",
+            "D.大量翻阅冷门同人，挖掘小众粮食",
+            "E.躺平佛系刷粮，等待新太太产出"
+        ]
+    },
+    // 28
+    {
+        title: "28. 面对很多年后两人可能资源渐行渐远的假设，你的心态？",
+        dim: "ND",
+        opt: [
+            "A.哪怕结局留有遗憾，这段情感依旧值得铭记",
+            "B.能够接受远距离的长线留白式关系",
+            "C.可以释怀，只要曾经有过足够多的糖分",
+            "D.只要偶尔还有同框小互动就可以满足",
+            "E.无法接受后续互动变少，依赖感很重"
+        ]
+    },
+    // 29
+    {
+        title: "29. 空窗期时你最常使用的嗑糖方式？",
+        dim: "EI",
+        opt: [
+            "A.循环刷经典官方舞台",
+            "B.翻阅物料",
+            "C.刷同人AU剪辑/文",
+            "D.和同担唠嗑扒细节",
+            "E.自我脑补"
+        ]
+    },
+    // 30
+    {
+        title: "30. 圈内各种BE/HE走向，你的偏好程度？",
+        dim: "ND",
+        opt: [
+            "A.重度BE爱好者，爱看意难平",
+            "B.甜虐三七分，有故事感",
+            "C.甜虐对半",
+            "D.甜文为主，少量小虐",
+            "E.纯HE狂热粉"
+        ]
+    },
+    // 31
+    {
+        title: "31. 面对圈内争论，你最容易有情绪的是？",
+        dim: "AL",
+        opt: [
+            "A.管理组规则争议",
+            "B.唯粉KY/提纯",
+            "C.太太产出分歧",
+            "D.公司压榨双人资源",
+            "E.反感过度脑补"
+        ]
+    },
+    // 32
+    {
+        title: "32. 你的二创入坑AU世界观最爱哪一个？",
+        dim: "EI",
+        opt: [
+            "A.娱乐圈前后辈",
+            "B.校园暗恋",
+            "C.ABO设定",
+            "D.古风江湖",
+            "E.现实向成长纪实"
+        ]
+    },
+    // 33
+    {
+        title: "33. 面对圈子里的其他同担，你的相处态度？",
+        dim: "AL",
+        opt: [
+            "A.热情，主动扩列抱团",
+            "B.礼貌友善，选择性深交",
+            "C.友好观望，发言较少",
+            "D.有固定挚友来往",
+            "E.独狼模式，很少结交圈内好友"
+        ]
+    },
+    // 34
+    {
+        title: "34. 你认为橹穆这份深刻的缘分主要来源于？",
+        dim: "ND",
+        opt: [
+            "A.上天注定",
+            "B.四次元太太给力",
+            "C.表弟自己系的红线",
+            "D.表哥的纵容",
+            "E.双向吸引"
+        ]
+    },
+    // 35 趣味不计分
+    {
+        title: "35. 你最喜欢的橹穆应援口号？",
+        dim: "none",
+        opt: [
+            "A.橹穆星途璀璨",
+            "B.橹橹春韵 穆穆良朝",
+            "C.穆之所及，杰是美好",
+            "D.271199"
+        ]
+    },
+    // 36 趣味不计分
+    {
+        title: "36. 你心中封神的TOP1橹穆糖点？",
+        dim: "none",
+        opt: [
+            "A.壁纸",
+            "B.海德薇",
+            "C.不心动挑战",
+            "D.摸桌角",
+            "E.网易云",
+            "F.祉疼药"
+        ]
+    },
+    // 37 趣味不计分
+    {
+        title: "37. 你最吃哪一支橹穆衍生CP称呼？",
+        dim: "none",
+        opt: [
+            "A.杰丞",
+            "B.豚馒",
+            "C.困丞",
+            "D.全穆",
+            "E.困恩"
+        ]
+    },
+    // 38 趣味不计分
+    {
+        title: "38. 属于你的最佳嗑CP时间段&投入时长？",
+        dim: "none",
+        opt: [
+            "A.全天在线，有空就刷相关物料",
+            "B.晚间休闲时段，睡前固定沉浸式嗑糖",
+            "C.深夜凌晨，夜深才最适合脑补和看虐文",
+            "D.有呼吸就在嗑，精神世界常驻橹穆宇宙",
+            "E.随缘随缘，想起才会过来看一看"
+        ]
+    }
+];
+
+        // 16人格对应表 【代码:昵称:配图:解读文案】
+        const personalityMap = {
+            EOAN:{
+                nick:"青梅战地考据果｜战斗果果",
+                img:"img/EOAN.jpg",
+                desc:"【EOAN 青梅战地考据果】\n你是圈内硬核考据派+行动派！执着于官方实锤物料，热爱创作产出，遇到争议会主动发声维护。偏爱两人多年相伴的宿命羁绊，是圈子里可靠的战斗大女儿，擅长挖掘细节、整理考据，是同担心中的情报担当。"
+            },
+            EOAD:{
+                nick:"镜头细节产粮派｜巧手LMP",
+                img:"img/EOAD.jpg",
+                desc:"【EOAD 镜头细节产粮青梅】\n专注镜头里的细碎甜感，同时热爱二创产出。擅长捕捉瞬时互动小动作，愿意把美好画面做成作品分享，性格温和但有立场，是圈内心灵手巧的细节女儿，甜系嗑糖代表。"
+            },
+            EOLN:{
+                nick:"宿命感文豪果果｜文豪青梅果",
+                img:"img/EOLN.jpg",
+                desc:"【EOLN 沉书宿命文豪果果】\n痴迷长线宿命与BE美学，深耕官方物料，笔下有万千故事。偏爱安静创作，不喜欢纷争，是圈内低调的文豪，用文字记录两人一路走来的羁绊，温柔又有深度。"
+            },
+            EOLD:{
+                nick:"细节安静写手→温柔拾糖枳｜佛系乖巧小枳枳",
+                img:"img/EOLD.jpg",
+                desc:"【EOLD 镜头温柔拾糖枳】\n忠于官方物料，偏爱日常细碎温柔，偶尔动笔产出。性格佛系圈地自萌，从不参与争执，安安静静捡拾每一份镜头里的小甜蜜，是圈子里乖巧温柔的小枳枳。"
+            },
+            EVAN:{
+                nick:"前线冲锋青梅果｜热血前线LMP",
+                img:"img/EVAN.jpg",
+                desc:"【EVAN 情报前线冲锋青梅】\n一线蹲守官方最新物料，纯吃粮不爱创作，遇事敢主动发声。追逐两人的宿命故事，行动力拉满，是圈内奔走的情报前线果果，热情直率。"
+            },
+            EVAD:{
+                nick:"瞬时甜感冲锋枳｜活泼闹腾小枳枳",
+                img:"img/EVAD.jpg",
+                desc:"【EVAD 冲锋枳】\n沉迷当下近距离甜互动，只快乐吃粮不产出。性格活泼外向，算是随了果脯了，遇到不公愿意出声，偏爱轻松愉快的日常糖，是圈子里热闹可爱的小枳枳。"
+            },
+            EVLN:{
+                nick:"闲散青梅｜养老佛系果",
+                img:"img/EVLN.jpg",
+                desc:"【EVLN 时光典藏闲散青梅】\n收藏过往全部经典物料，佛系吃粮不创作、不争执。偏爱多年沉淀的宿命感，心态养老松弛，静静回味两人一路走来的故事，与世无争。"
+            },
+            EVLD:{
+                nick:"无忧享乐果｜快乐摆烂青梅小闺女",
+                img:"img/EVLD.jpg",
+                desc:"【EVLD 现世无忧享乐果】\n主打快乐摆烂嗑糖，只看日常甜份，纯观光不产出、不掺和纷争。享受当下每一份细碎美好，心态轻松自在，是无忧无虑的快乐小女儿。"
+            },
+            IOAN:{
+                nick:"二次元战斗果｜脑洞战神LMP长女",
+                img:"img/IOAN.jpg",
+                desc:"【IOAN 次元空想战斗青梅】\n超强脑补能力，擅长构建架空剧情，热爱创作。遇到恶意会主动维护，偏爱宿命长线故事，脑洞大开又有担当，是圈内脑洞战神长女。"
+            },
+            IOAD:{
+                nick:"显微拾糖枳｜脑洞巧手LMP",
+                img:"img/IOAD.jpg",
+                desc:"【IOAD 显微臆想拾糖枳】\n从细微之处展开无限脑补，动手能力强喜欢产出。沉迷瞬时小动作甜感，性格温和，用脑洞和双手创造专属糖点，灵动又可爱。"
+            },
+            IOLN:{
+                nick:"幻梦隐居果｜孤僻幻想文豪",
+                img:"img/IOLN.jpg",
+                desc:"【IOLN 星河幻梦隐居果果】\n深度脑补+偏爱宿命BE，沉浸在自己的幻想世界。低调圈地自萌，极少对外交流，擅长创作长篇故事，是隐居在自己宇宙里的幻想文豪。"
+            },
+            IOLD:{
+                nick:"幻想枳｜独处温柔小枳枳",
+                img:"img/IOLD.jpg",
+                desc:"【IOLD 私域细碎幻思枳】\n独处时靠脑补补充日常甜份，圈地自萌不社交。偏爱生活化小细节，安静温柔，在自己的小世界里独享嗑糖快乐。"
+            },
+            IVAN:{
+                nick:"线索推演热血青梅｜激进脑洞LMP果果",
+                img:"img/IVAN.jpg",
+                desc:"【IVAN 线索推演热血青梅】\n靠细节推演+脑补挖掘糖点，纯吃粮不创作。性格热血，愿意下场维护，相信两人的宿命缘分，脑洞与行动力兼备。"
+            },
+            IVAD:{
+                nick:"热闹枳｜乐天冲动小枳枳",
+                img:"img/IVAD.jpg",
+                desc:"【IVAD 一瞬捕捉热闹枳】\n捕捉瞬间细节无限脑补，快乐吃粮不产出。性格外向热闹，直率冲动，沉迷当下甜蜜，活得简单又开心。"
+            },
+            IVLN:{
+                nick:"漫游青梅｜淡然养老LMP",
+                img:"img/IVLN.jpg",
+                desc:"【IVLN 游离世外漫游青梅】\n重度脑补玩家，佛系养老，不产出、不争执。偏爱长线宿命故事，心态淡然，游离在圈子之外，独自漫游在橹穆的世界里。"
+            },
+            IVLD:{
+                nick:"自给自足逍遥果｜快乐摆烂小女儿",
+                img:"img/IVLD.jpg",
+                desc:"【IVLD 自给自足逍遥果】\n完全自给自足脑补造糖，摆烂吃粮，圈地自萌。只爱日常甜感，不参与任何圈子互动，独处也能收获满满快乐，逍遥自在。"
+            }
+        };
+
+        // 渲染题目
+        function renderQ(){
+            let q = questionList[currentQ];
+            document.getElementById('qNum').innerText = `第 ${currentQ+1} 题 / 共 ${totalQ} 题`;
+            document.getElementById('qTitle').innerText = q.title;
+            // 进度条
+            let per = ((currentQ+1)/totalQ)*100;
+            document.getElementById('progressBar').style.width = per + "%";
+            // 渲染选项
+            let box = document.getElementById('optionsBox');
+            box.innerHTML = "";
+            q.opt.forEach((item,idx)=>{
+                let btn = document.createElement("button");
+                btn.className = "option";
+                btn.innerText = item;
+                if(userAnswer[currentQ] === idx) btn.classList.add("active");
+                btn.onclick = function(){
+                    selectOpt(idx);
+                }
+                box.appendChild(btn);
+            });
+        }
+
+        // 选择选项
+        function selectOpt(idx){
+            userAnswer[currentQ] = idx;
+            renderQ();
+            saveCache();
+        }
+
+        // 上一题
+        function prevQ(){
+            if(currentQ > 0){
+                currentQ--;
+                renderQ();
+                saveCache();
+            }
+        }
+        // 下一题 / 交卷
+        function nextQ(){
+            if(userAnswer[currentQ] === undefined){
+                alert("请先选择一个选项哦~");
+                return;
+            }
+            // 【修复计分逻辑】
+            let q = questionList[currentQ];
+            if(q.dim !== "none"){
+                let val = [2,1,0,-1,-2][userAnswer[currentQ]];
+                switch(q.dim){
+                    case "EI":
+                        score[0] += val;
+                        score[1] -= val;
+                        break;
+                    case "OV":
+                        score[2] += val;
+                        score[3] -= val;
+                        break;
+                    case "AL":
+                        score[4] += val;
+                        score[5] -= val;
+                        break;
+                    case "ND":
+                        score[6] += val;
+                        score[7] -= val;
+                        break;
+                }
+            }
+            saveCache();
+
+            if(currentQ < questionList.length-1){
+                currentQ++;
+                renderQ();
+            }else{
+                // 答完所有题，进入loading
+                goLoad();
+                setTimeout(calcResult,1800);
+            }
+        }
+
+        // 计算最终人格
+        function calcResult(){
+            // 判断四维度倾向
+            let E = score[0] > score[1] ? "I":"E";
+            let O = score[2] > score[3] ? "V":"O";
+            let A = score[4] > score[5] ? "L":"A";
+            let N = score[6] > score[7] ? "D":"N";
+            let finalCode = E+O+A+N;
+            let res = personalityMap[finalCode];
+
+            // 渲染结果页
+            document.getElementById('resCode').innerText = finalCode;
+            document.getElementById('resNick').innerText = res.nick;
+            document.getElementById('resImg').src = res.img;
+            document.getElementById('resDesc').innerText = res.desc;
+
+            // 【修复雷达图重复绘制】
+            const canvasDom = document.getElementById('radarChart');
+            if(radarChartIns){
+                radarChartIns.destroy();
+            }
+            const ctx = canvasDom.getContext('2d');
+            radarChartIns = new Chart(ctx,{
+                type:'radar',
+                data:{
+                    labels:['追物料(E)','爱脑补(I)','爱产出(O)','纯吃粮(V)','敢发声(A)','圈地自萌(L)','宿命感(N)','日常甜(D)'],
+                    datasets:[{
+                        label:'你的属性分值',
+                        data:score,
+                        backgroundColor:'rgba(132,169,255,0.3)',
+                        borderColor:'#ffb3d9',
+                        pointBackgroundColor:'#7a67ee'
+                    }]
+                },
+                options:{scales:{r:{min:-10,max:10}}}
+            });
+            goRes();
+        }
+
+        // 复制结果
+        function copyResult(){
+            let code = document.getElementById('resCode').innerText;
+            let nick = document.getElementById('resNick').innerText;
+            let desc = document.getElementById('resDesc').innerText;
+            let text = `我的16LMPTI橹穆同担人格：${code}\n${nick}\n${desc}`;
+            navigator.clipboard.writeText(text).then(()=>{
+                alert("结果已复制，快去分享给同担吧！");
+            })
+        }
+
+        // 重新测试
+        function restart(){
+            currentQ = 0;
+            userAnswer = [];
+            score = [0,0,0,0,0,0,0,0];
+            localStorage.removeItem('lmptiCache');
+            goQuiz();
+        }
+
+        // 页面加载读取本地缓存
+        window.onload = function(){
+            let cache = localStorage.getItem('lmptiCache');
+            if(cache){
+                let data = JSON.parse(cache);
+                currentQ = data.currentQ;
+                userAnswer = data.userAnswer;
+                score = data.score;
+            }
+        }
+    </script>
+</body>
+</html>
